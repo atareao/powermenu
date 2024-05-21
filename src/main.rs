@@ -1,8 +1,11 @@
+mod utils;
+
 use gio::prelude::*;
 use gtk::prelude::*;
-use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use gtk::CssProvider;
 use gdk::Display;
+
+use utils::set_full_screen;
 
 const APP_ID: &str = "es.atareao.Powermenu";
 
@@ -26,7 +29,6 @@ fn build_ui(application: &gtk::Application) {
 
     // Create a normal GTK window however you like
     let window = gtk::ApplicationWindow::new(application);
-    let display = gdk::Display::default().unwrap();
 
 
     let geometry = &first.geometry();
@@ -37,45 +39,8 @@ fn build_ui(application: &gtk::Application) {
     // Before the window is first realized, set it up to be a layer surface
     //window.init_layer_shell();
 
-
-
-    window.init_layer_shell();
-
-    // Display above normal windows
-    window.set_layer(Layer::Overlay);
-    // Push other windows out of the way
-    //window.auto_exclusive_zone_enable();
-    window.set_exclusive_zone(-1);
-
-    // The margins are the gaps around the window's edges
-    // Margins and anchors can be set like this...
-    
-    window.set_margin(Edge::Left, margin_h);
-    window.set_margin(Edge::Right, margin_h);
-    window.set_margin(Edge::Top, margin_v);
-    window.set_margin(Edge::Bottom, margin_v);
-
-    let surface = window.surface().unwrap();
-    let active_monitor = display.monitor_at_surface(&surface).unwrap();
-    window.set_monitor(&active_monitor);
-
-
-
-
-    // ... or like this
-    // Anchors are if the window is pinned to each edge of the output
-    let anchors = [
-        (Edge::Left, true),
-        (Edge::Right, true),
-        (Edge::Top, false),
-        (Edge::Bottom, true),
-    ];
-
-    for (anchor, state) in anchors {
-        window.set_anchor(anchor, state);
-    }
-
     // Set up a widget
+    set_full_screen(&window, -1, true);
     let content_box = build_powermenu();
     window.set_child(Some(&content_box));
     window.present()
